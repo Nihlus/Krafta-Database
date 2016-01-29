@@ -23,13 +23,24 @@ using MySql.Data.MySqlClient;
 
 namespace Krafta.Records
 {
+	/// <summary>
+	/// Interface for SQL records, providing basic property fields and an insert function.
+	/// </summary>
 	public interface ISqlRecord
 	{
+		/// <summary>
+		/// Gets the date.
+		/// </summary>
+		/// <value>The date.</value>
 		string Date
 		{
 			get;
 		}
 
+		/// <summary>
+		/// Gets the time.
+		/// </summary>
+		/// <value>The time.</value>
 		string Time
 		{
 			get;
@@ -37,11 +48,21 @@ namespace Krafta.Records
 
 		// ...
 
+		/// <summary>
+		/// Gets whether or not the turbine was on when this record was created.
+		/// </summary>
+		/// <value><c>true</c> if the turbine was on; otherwise, <c>false</c>.</value>
 		bool State
 		{
 			get;
 		}
 
+		/// <summary>
+		/// Inserts the record into the database if it is unique. Its uniqueness is determined by 
+		/// the time and date of the record. If there is not a record in the database where these two match
+		/// this record, it is unique.
+		/// </summary>
+		/// <returns><c>true</c>, if the record was inserted, <c>false</c> otherwise.</returns>
 		bool InsertUnique(MySqlConnection connection);
 	}
 }

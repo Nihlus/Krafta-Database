@@ -33,15 +33,6 @@ namespace Krafta
 {
 	class MainClass
 	{
-		private const string SQL_SETUP = "";
-		private const string SQL_INSERT_NEW_EFFECT_VALUE = "";
-		private const string SQL_INSERT_NEW_ALARM_VALUE = "";
-		private const string SQL_INSERT_NEW_TEMP_VALUE = "";
-		private const string SQL_INSERT_NEW_FLYWHEEL_VALUE = "";
-
-		private const string SQL_CHECK_TABLE_EXISTS = "SHOW TABLES LIKE \'{0}\'";
-		private const string SQL_VERIFY_UNIQUE_VALUE = "";
-
 		public static int Main(string[] args)
 		{
 			// Execution path sketch
@@ -456,14 +447,17 @@ namespace Krafta
 			return 0;
 		}
 
-		private static List<string> GetChangedRecords(List<string> oldRecords, List<string> newRecords)
-		{
-			return null;
-		}
-
+		/// <summary>
+		/// Checks if the specified table exists in the database.
+		/// </summary>
+		/// <returns><c>true</c>, if the table exists, <c>false</c> otherwise.</returns>
+		/// <param name="tableName">Table name to check.</param>
+		/// <param name="connection">Live connection to the database.</param>
 		private static bool DoesTableExist(string tableName, MySqlConnection connection)
 		{			
-			MySqlCommand tableCheck = new MySqlCommand(String.Format(SQL_CHECK_TABLE_EXISTS, tableName), connection);
+			string baseCommand = "SHOW TABLES LIKE @tableName";
+			MySqlCommand tableCheck = new MySqlCommand(baseCommand, connection);
+			tableCheck.Parameters.AddWithValue("@tableName", tableName);
 
 			using (var reader = tableCheck.ExecuteReader())
 			{
@@ -478,6 +472,11 @@ namespace Krafta
 			}
 		}
 
+		/// <summary>
+		/// Caches the specifed records, effectively moving them from /data/new to /data/old.
+		/// </summary>
+		/// <param name="newRecordsPath">New records path.</param>
+		/// <param name="oldRecordsPath">Old records path.</param>
 		private static void CacheRecords(string newRecordsPath, string oldRecordsPath)
 		{
 			if (File.Exists(oldRecordsPath))
@@ -488,6 +487,10 @@ namespace Krafta
 			File.Move(newRecordsPath, oldRecordsPath);
 		}
 
+		/// <summary>
+		/// Creates the initial folders where data is stored.
+		/// These folders are required for the program to run.
+		/// </summary>
 		private static void SetupInitialFolders()
 		{
 
@@ -512,21 +515,37 @@ namespace Krafta
 			}
 		}
 
+		/// <summary>
+		/// Gets the old lower station data directory where cached records are stored.
+		/// </summary>
+		/// <returns>The old lower station data directory.</returns>
 		private static string GetOldLowerStationDataDirectory()
 		{
 			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "lower" + Path.DirectorySeparatorChar;
 		}
 
+		/// <summary>
+		/// Gets the old upper station data directory where cached records are stored.
+		/// </summary>
+		/// <returns>The old upper station data directory.</returns>
 		private static string GetOldUpperStationDataDirectory()
 		{
 			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "upper" + Path.DirectorySeparatorChar;
 		}
 
+		/// <summary>
+		/// Gets the new lower station data directory where new data is stored.
+		/// </summary>
+		/// <returns>The new lower station data directory.</returns>
 		private static string GetNewLowerStationDataDirectory()
 		{
 			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "lower" + Path.DirectorySeparatorChar;
 		}
 
+		/// <summary>
+		/// Gets the new upper station data directory where new data is stored.
+		/// </summary>
+		/// <returns>The new upper station data directory.</returns>
 		private static string GetNewUpperStationDataDirectory()
 		{
 			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "upper" + Path.DirectorySeparatorChar;

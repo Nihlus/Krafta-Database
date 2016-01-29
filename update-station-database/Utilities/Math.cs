@@ -32,7 +32,7 @@ namespace Krafta.Utilities
 		/// </summary>
 		/// <returns>The corrected temperature value.</returns>
 		/// <param name="incorrectTemperatureValue">Incorrect temperature value.</param>
-		// <param name="decimalPlaces">The number of decimal places in the input value.</param>
+		/// <param name="decimalPlaces">The number of decimal places in the input value.</param>
 		public static string CorrectNumericRecordValue(string incorrectTemperatureValue, int decimalPlaces)
 		{
 			int decimalPointIndex = incorrectTemperatureValue.Length - decimalPlaces;
