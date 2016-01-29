@@ -25,6 +25,9 @@ using Krafta.Configuration;
 using System.IO;
 using System.Security;
 using MySql.Data.MySqlClient;
+using System.Collections.Generic;
+using Krafta.Records;
+using System.Linq;
 
 namespace Krafta
 {
@@ -36,10 +39,11 @@ namespace Krafta
 		private const string SQL_INSERT_NEW_TEMP_VALUE = "";
 		private const string SQL_INSERT_NEW_FLYWHEEL_VALUE = "";
 
+		private const string SQL_CHECK_TABLE_EXISTS = "SHOW TABLES LIKE \'{0}\'";
+		private const string SQL_VERIFY_UNIQUE_VALUE = "";
+
 		public static int Main(string[] args)
 		{
-			Console.WriteLine("Hello World!");
-
 			// Execution path sketch
 
 			// -- Initial startup checks --
@@ -62,9 +66,385 @@ namespace Krafta
 				try
 				{
 					connection.Open();
+					connection.ChangeDatabase("krafta");
 
-					// If previous data exists, load it.
-					// If new data exists, load it. If not, exit.
+					// -- Database setup --
+					if (!DoesTableExist("effect_G1", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(EffectG1.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}
+
+					if (!DoesTableExist("effect_G2", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(EffectG2.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}
+
+					if (!DoesTableExist("effect_G3", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(EffectG3.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}
+
+					if (!DoesTableExist("temp_G1", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(TempG1.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}		
+
+					if (!DoesTableExist("temp_G2", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(TempG2.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}	
+
+					if (!DoesTableExist("temp_G3", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(TempG3.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}						
+
+					if (!DoesTableExist("water_level_lower", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(WaterLevelLower.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}	
+
+					if (!DoesTableExist("water_level_upper", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(WaterLevelUpper.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}	
+
+					if (!DoesTableExist("flywheel_G1", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(FlywheelG1.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}	
+
+					if (!DoesTableExist("flywheel_G2", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(FlywheelG2.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}
+
+					if (!DoesTableExist("flywheel_G3", connection))
+					{
+						MySqlCommand createTable = new MySqlCommand(FlywheelG3.GetTableCreationString(), connection);
+						createTable.ExecuteNonQuery();
+					}
+
+					// -- Database Update ---
+					// Load effect data for G1
+					string newTargetFile = GetNewUpperStationDataDirectory() + "EFFEKT.SKV";
+					string oldTargetFile = GetOldUpperStationDataDirectory() + "EFFEKT.SKV";
+					if (File.Exists(newTargetFile))
+					{
+						List<string> upperEffectRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							upperEffectRecords = upperEffectRecords.Except(oldRecords).ToList();
+						}
+
+						List<EffectG1> G1EffectRecords = new List<EffectG1>();
+						foreach (string record in upperEffectRecords)
+						{
+							if (record != "END")
+							{
+								G1EffectRecords.Add(new EffectG1(record));
+							}
+						}
+
+						foreach (ISqlRecord sqlRecord in G1EffectRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewLowerStationDataDirectory() + "EFFEKT.SKV";
+					oldTargetFile = GetOldLowerStationDataDirectory() + "EFFEKT.SKV";
+					// Load effect data for G2 & G3
+					if (File.Exists(newTargetFile))
+					{
+						List<string> lowerEffectRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							lowerEffectRecords = lowerEffectRecords.Except(oldRecords).ToList();
+						}
+
+						List<EffectG2> G2EffectRecords = new List<EffectG2>();
+						List<EffectG3> G3EffectRecords = new List<EffectG3>();
+						foreach (string record in lowerEffectRecords)
+						{
+							if (record != "END")
+							{
+								G2EffectRecords.Add(new EffectG2(record));
+								G3EffectRecords.Add(new EffectG3(record));
+							}
+						}
+
+						foreach (ISqlRecord sqlRecord in G2EffectRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						foreach (ISqlRecord sqlRecord in G3EffectRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewUpperStationDataDirectory() + "TEMP.SKV";
+					oldTargetFile = GetOldUpperStationDataDirectory() + "TEMP.SKV";
+					// Load temperature data for G1
+					if (File.Exists(newTargetFile))
+					{
+						List<string> upperTemperatureRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							upperTemperatureRecords = upperTemperatureRecords.Except(oldRecords).ToList();
+						}
+
+						List<TempG1> G1TemperatureRecords = new List<TempG1>();
+						foreach (string record in upperTemperatureRecords)
+						{
+							if (record != "END")
+							{
+								G1TemperatureRecords.Add(new TempG1(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G1TemperatureRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewLowerStationDataDirectory() + "TEMPG2.SKV";
+					oldTargetFile = GetOldLowerStationDataDirectory() + "TEMPG2.SKV";
+					// Load temperature data for G2 & G3
+					if (File.Exists(newTargetFile))
+					{
+						List<string> lowerTemperatureRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							lowerTemperatureRecords = lowerTemperatureRecords.Except(oldRecords).ToList();
+						}
+
+						List<TempG2> G2TemperatureRecords = new List<TempG2>();
+						foreach (string record in lowerTemperatureRecords)
+						{
+							if (record != "END")
+							{
+								G2TemperatureRecords.Add(new TempG2(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G2TemperatureRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewLowerStationDataDirectory() + "TEMPG3.SKV";
+					oldTargetFile = GetOldLowerStationDataDirectory() + "TEMPG3.SKV";
+					if (File.Exists(newTargetFile))
+					{
+						List<string> lowerTemperatureRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							lowerTemperatureRecords = lowerTemperatureRecords.Except(oldRecords).ToList();
+						}
+
+						List<TempG3> G3TemperatureRecords = new List<TempG3>();
+						foreach (string record in lowerTemperatureRecords)
+						{
+							if (record != "END")
+							{
+								G3TemperatureRecords.Add(new TempG3(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G3TemperatureRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewUpperStationDataDirectory() + "OVY.SKV";
+					oldTargetFile = GetOldUpperStationDataDirectory() + "OVY.SKV";
+					// Load water data for upper station
+					if (File.Exists(newTargetFile))
+					{
+						List<string> upperWaterRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							upperWaterRecords = upperWaterRecords.Except(oldRecords).ToList();
+						}
+
+						List<WaterLevelUpper> G1WaterRecords = new List<WaterLevelUpper>();
+						foreach (string record in upperWaterRecords)
+						{
+							if (record != "END")
+							{
+								G1WaterRecords.Add(new WaterLevelUpper(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G1WaterRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewLowerStationDataDirectory() + "OVY.SKV";
+					oldTargetFile = GetOldLowerStationDataDirectory() + "OVY.SKV";
+					// Load water data for lower station
+					if (File.Exists(newTargetFile))
+					{
+						List<string> lowerWaterRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							lowerWaterRecords = lowerWaterRecords.Except(oldRecords).ToList();
+						}
+
+						List<WaterLevelLower> G23WaterRecords = new List<WaterLevelLower>();
+						foreach (string record in lowerWaterRecords)
+						{
+							if (record != "END")
+							{
+								G23WaterRecords.Add(new WaterLevelLower(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G23WaterRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewUpperStationDataDirectory() + "LOPHJUL.SKV";
+					oldTargetFile = GetOldUpperStationDataDirectory() + "LOPHJUL.SKV";
+					// Load flywheel data for G1
+					if (File.Exists(newTargetFile))
+					{
+						List<string> upperFlywheelRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							upperFlywheelRecords = upperFlywheelRecords.Except(oldRecords).ToList();
+						}
+
+						List<FlywheelG1> G1FlywheelRecords = new List<FlywheelG1>();
+						foreach (string record in upperFlywheelRecords)
+						{
+							if (record != "END")
+							{
+								G1FlywheelRecords.Add(new FlywheelG1(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G1FlywheelRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
+
+					newTargetFile = GetNewLowerStationDataDirectory() + "LOPHJUL.SKV";
+					oldTargetFile = GetOldLowerStationDataDirectory() + "LOPHJUL.SKV";
+					// Load flywheel data for G2 & G3
+					if (File.Exists(newTargetFile))
+					{
+						List<string> lowerFlywheelRecords = new List<string>(File.ReadAllLines(newTargetFile));
+
+						if (File.Exists(oldTargetFile))
+						{
+							List<string> oldRecords = new List<string>(File.ReadAllLines(oldTargetFile));
+
+							// Diff the lists and just use the new records					
+							lowerFlywheelRecords = lowerFlywheelRecords.Except(oldRecords).ToList();
+						}
+
+						List<FlywheelG2> G2FlywheelRecords = new List<FlywheelG2>();
+						List<FlywheelG3> G3FlywheelRecords = new List<FlywheelG3>();
+						foreach (string record in lowerFlywheelRecords)
+						{
+							if (record != "END")
+							{
+								G2FlywheelRecords.Add(new FlywheelG2(record));
+								G3FlywheelRecords.Add(new FlywheelG3(record));
+							}
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G2FlywheelRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						// Finally, insert the new records into the database
+						foreach (ISqlRecord sqlRecord in G3FlywheelRecords)
+						{
+							sqlRecord.InsertUnique(connection);
+						}
+
+						CacheRecords(newTargetFile, oldTargetFile);
+					}
 				}
 				catch (MySqlException mex)
 				{
@@ -74,6 +454,38 @@ namespace Krafta
 			}
 
 			return 0;
+		}
+
+		private static List<string> GetChangedRecords(List<string> oldRecords, List<string> newRecords)
+		{
+			return null;
+		}
+
+		private static bool DoesTableExist(string tableName, MySqlConnection connection)
+		{			
+			MySqlCommand tableCheck = new MySqlCommand(String.Format(SQL_CHECK_TABLE_EXISTS, tableName), connection);
+
+			using (var reader = tableCheck.ExecuteReader())
+			{
+				if (reader.HasRows)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+
+		private static void CacheRecords(string newRecordsPath, string oldRecordsPath)
+		{
+			if (File.Exists(oldRecordsPath))
+			{
+				File.Delete(oldRecordsPath);
+			}
+
+			File.Move(newRecordsPath, oldRecordsPath);
 		}
 
 		private static void SetupInitialFolders()
@@ -102,22 +514,22 @@ namespace Krafta
 
 		private static string GetOldLowerStationDataDirectory()
 		{
-			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "lower";
+			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "lower" + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetOldUpperStationDataDirectory()
 		{
-			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "upper";
+			return "data" + Path.DirectorySeparatorChar + "old" + Path.DirectorySeparatorChar + "upper" + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetNewLowerStationDataDirectory()
 		{
-			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "lower";
+			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "lower" + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetNewUpperStationDataDirectory()
 		{
-			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "upper";
+			return "data" + Path.DirectorySeparatorChar + "new" + Path.DirectorySeparatorChar + "upper" + Path.DirectorySeparatorChar;
 		}
 	}
 

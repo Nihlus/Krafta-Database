@@ -23,7 +23,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <CustomCommands>
       <CustomCommands>
-        <Command type="BeforeExecute" />
+        <Command type="BeforeExecute" command="sh download-stats.sh" workingdir="${ProjectDir}/bin/${ProjectConfigName}/" externalConsole="True" />
       </CustomCommands>
     </CustomCommands>
     <DocumentationFile>bin\Debug\update-station-database.xml</DocumentationFile>
@@ -56,6 +56,19 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Configuration\ConfigurationHandler.cs" />
+    <Compile Include="Records\EffectG2.cs" />
+    <Compile Include="Records\EffectG3.cs" />
+    <Compile Include="Records\EffectG1.cs" />
+    <Compile Include="Records\TempG1.cs" />
+    <Compile Include="Records\TempG2.cs" />
+    <Compile Include="Records\TempG3.cs" />
+    <Compile Include="Records\ISqlRecord.cs" />
+    <Compile Include="Utilities\Math.cs" />
+    <Compile Include="Records\WaterLevelLower.cs" />
+    <Compile Include="Records\WaterLevelUpper.cs" />
+    <Compile Include="Records\FlywheelG1.cs" />
+    <Compile Include="Records\FlywheelG2.cs" />
+    <Compile Include="Records\FlywheelG3.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
@@ -69,11 +82,16 @@
   </ProjectExtensions>
   <ItemGroup>
     <Folder Include="Configuration\" />
+    <Folder Include="Records\" />
+    <Folder Include="Utilities\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="krafta.cfg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="download-stats.sh">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
