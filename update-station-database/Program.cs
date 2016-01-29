@@ -57,7 +57,7 @@ namespace Krafta
 				try
 				{
 					connection.Open();
-					connection.ChangeDatabase("krafta");
+					connection.ChangeDatabase(Config.DatabaseName);
 
 					// -- Database setup --
 					if (!DoesTableExist("effect_G1", connection))

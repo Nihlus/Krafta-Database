@@ -76,6 +76,11 @@ namespace Krafta.Configuration
 								this.DatabasePassword = configurationKey.Value;
 								break;
 							}
+						case "DatabaseName":
+							{
+								this.DatabaseName = configurationKey.Value;
+								break;
+							}
 						case "DatabaseHost":
 							{
 								this.DatabaseHost = configurationKey.Value;
@@ -85,7 +90,7 @@ namespace Krafta.Configuration
 							{
 								this.DatabasePort = configurationKey.Value;
 								break;
-							}
+							}						
 						default:
 							{
 								break;
@@ -111,19 +116,20 @@ namespace Krafta.Configuration
 		/// </summary>
 		public static void CreateDefaultConfigurationFile()
 		{
-			string defaultConfigContents = "// Krafta configuration file.\n" +
+			string defaultConfigContents = "//\tKrafta configuration file.\n" +
 			                               "//\n" +
-			                               "//	The default configuration file looks like this: \n" +
+			                               "//\tThe default configuration file looks like this: \n" +
 			                               "//\n" +
-			                               "//	DatabaseUsername=kraftauser\n" +
-			                               "//	DatabasePassword=kraftapassword\n" +
-			                               "//	DatabaseHost=localhost\n" +
-			                               "//	DatabasePort=3306\n" +
+			                               "//\tDatabaseUsername=kraftauser\n" +
+			                               "//\tDatabasePassword=kraftapassword\n" +
+			                               "//\tDatabaseName=krafta\n" +
+			                               "//\tDatabaseHost=localhost\n" +
+			                               "//\tDatabasePort=3306\n" +
 			                               "//\n" +
-			                               "//	All keys in the file are formatted according to this spec: \n" +
-			                               "//  <key>=<value>\n" +
-			                               "//  Anything preceding the first equality sign is regarded as a key, and anything after it as the value.\n" +
-			                               "//  Values are not verified, and are assumed to be valid.\n" +
+			                               "//\tAll keys in the file are formatted according to this spec: \n" +
+			                               "//\t<key>=<value>\n" +
+			                               "//\tAnything preceding the first equality sign is regarded as a key, and anything after it as the value.\n" +
+			                               "//\tValues are not verified, and are assumed to be valid.\n" +
 			                               "\n" +
 			                               "DatabaseUsername=kraftauser\n" +
 			                               "DatabasePassword=kraftapassword\n" +
@@ -171,6 +177,16 @@ namespace Krafta.Configuration
 		/// </summary>
 		/// <value>The database password.</value>
 		public string DatabasePassword
+		{
+			get;
+			private set;
+		}
+
+		/// <summary>
+		/// Gets the name of the database.
+		/// </summary>
+		/// <value>The name of the database.</value>
+		public string DatabaseName
 		{
 			get;
 			private set;

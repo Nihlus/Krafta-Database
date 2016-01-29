@@ -93,5 +93,6 @@
     <None Include="download-stats.sh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Readme.md" />
   </ItemGroup>
 </Project>
