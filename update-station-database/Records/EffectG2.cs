@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using MySql.Data.MySqlClient;
+using System.Globalization;
 
 namespace Krafta.Records
 {
@@ -48,7 +49,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.Effect = uint.Parse(recordParts[2]);
+				this.Effect = int.Parse(recordParts[2], NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (recordParts.Length > 4)
@@ -97,7 +98,7 @@ namespace Krafta.Records
 		/// Gets the output effect in kW.
 		/// </summary>
 		/// <value>The effect.</value>
-		public uint Effect
+		public int Effect
 		{
 			get;
 			private set;

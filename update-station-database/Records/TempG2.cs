@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using MySql.Data.MySqlClient;
+using System.Globalization;
 
 namespace Krafta.Records
 {
@@ -48,7 +49,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.RearGeneratorBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[2], 1));
+				this.RearGeneratorBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[2], 1), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (String.IsNullOrWhiteSpace(recordParts[3]))
@@ -57,7 +58,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.FrontGeneratorBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[3], 1));
+				this.FrontGeneratorBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[3], 1), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (String.IsNullOrWhiteSpace(recordParts[4]))
@@ -66,7 +67,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.RearFlywheelBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[4], 1));
+				this.RearFlywheelBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[4], 1), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (String.IsNullOrWhiteSpace(recordParts[5]))
@@ -75,7 +76,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.FrontFlywheelBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[5], 1));
+				this.FrontFlywheelBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[5], 1), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (String.IsNullOrWhiteSpace(recordParts[6]))
@@ -84,7 +85,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.TurbineBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[6], 1));
+				this.TurbineBearingTemperature = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[6], 1), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (recordParts.Length > 7)

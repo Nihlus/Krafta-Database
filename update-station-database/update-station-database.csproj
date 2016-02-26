@@ -94,5 +94,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Readme.md" />
+    <None Include="LICENSE" />
   </ItemGroup>
 </Project>

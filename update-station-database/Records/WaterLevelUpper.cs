@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 using System;
 using MySql.Data.MySqlClient;
+using System.Globalization;
 
 namespace Krafta.Records
 {
@@ -48,7 +49,7 @@ namespace Krafta.Records
 			}
 			else
 			{
-				this.WaterLevel = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[2], 2));
+				this.WaterLevel = double.Parse(Utilities.Math.CorrectNumericRecordValue(recordParts[2], 2), NumberStyles.Any, CultureInfo.InvariantCulture);
 			}
 
 			if (recordParts.Length > 3)
