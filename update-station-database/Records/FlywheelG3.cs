@@ -37,8 +37,7 @@ namespace Krafta.Records
 
 			string[] recordParts = cleanRecord.Split(';');
 
-			this.Date = recordParts[0];
-			this.Time = recordParts[1];
+			this.Date = recordParts[0] + " " + recordParts[1];
 
 			if (String.IsNullOrWhiteSpace(recordParts[3]))
 			{
@@ -82,16 +81,6 @@ namespace Krafta.Records
 		/// </summary>
 		/// <value>The date.</value>
 		public string Date
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// Gets the time when the record was created.
-		/// </summary>
-		/// <value>The time.</value>
-		public string Time
 		{
 			get;
 			private set;
@@ -149,8 +138,7 @@ namespace Krafta.Records
 		{
 			return "CREATE TABLE flywheel_G3 (" +
 			"id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-			"date TEXT," +
-			"time TEXT," +
+			"date DATETIME," +
 			"throttle DECIMAL(5, 2)," +
 			"hatch_level DECIMAL(5, 2)," +
 			"OVY INT," +
@@ -166,12 +154,11 @@ namespace Krafta.Records
 		/// <returns><c>true</c>, if unique was inserted, <c>false</c> otherwise.</returns>
 		public bool InsertUnique(MySqlConnection connection)
 		{
-			string baseInsertCommand = "INSERT INTO flywheel_G3 (date, time, throttle, hatch_level, OVY, state) VALUES(@date, @time, @throttle, @hatch_level, @OVY, @state)";
-			string baseSelectCommand = "SELECT date, time FROM flywheel_G3 WHERE date LIKE @date AND time LIKE @time";
+			string baseInsertCommand = "INSERT INTO flywheel_G3 (date, throttle, hatch_level, OVY, state) VALUES(@date, @throttle, @hatch_level, @OVY, @state)";
+			string baseSelectCommand = "SELECT date FROM flywheel_G3 WHERE date LIKE @date";
 
 			MySqlCommand selectCommand = new MySqlCommand(baseSelectCommand, connection);
 			selectCommand.Parameters.AddWithValue("@date", this.Date);
-			selectCommand.Parameters.AddWithValue("@time", this.Time);
 
 			try
 			{
@@ -190,7 +177,6 @@ namespace Krafta.Records
 
 			MySqlCommand insertCommand = new MySqlCommand(baseInsertCommand, connection);
 			insertCommand.Parameters.AddWithValue("@date", this.Date);
-			insertCommand.Parameters.AddWithValue("@time", this.Time);
 			insertCommand.Parameters.AddWithValue("@throttle", this.Throttle);
 			insertCommand.Parameters.AddWithValue("@hatch_level", this.HatchLevel);
 			insertCommand.Parameters.AddWithValue("@OVY", this.OVY);

@@ -40,8 +40,7 @@ namespace Krafta.Records
 
 			string[] recordParts = cleanRecord.Split(';');
 
-			this.Date = recordParts[0];
-			this.Time = recordParts[1];
+			this.Date = recordParts[0] + " " + recordParts[1];
 
 			if (String.IsNullOrWhiteSpace(recordParts[2]))
 			{
@@ -86,16 +85,6 @@ namespace Krafta.Records
 		/// </summary>
 		/// <value>The date.</value>
 		public string Date
-		{
-			get;
-			private set;
-		}
-
-		/// <summary>
-		/// Gets the time when the record was created.
-		/// </summary>
-		/// <value>The time.</value>
-		public string Time
 		{
 			get;
 			private set;
@@ -153,8 +142,7 @@ namespace Krafta.Records
 		{
 			return "CREATE TABLE temp_G3 (" +
 			"id INTEGER PRIMARY KEY AUTO_INCREMENT," +
-			"date TEXT," +
-			"time TEXT," +
+			"date DATETIME," +
 			"rear_generator_bearing_temp DECIMAL(4, 1)," +
 			"front_generator_bearing_temp DECIMAL(4, 1)," +
 			"turbine_bearing_temp DECIMAL(4, 1)," +
@@ -170,16 +158,15 @@ namespace Krafta.Records
 		/// <returns><c>true</c>, if unique was inserted, <c>false</c> otherwise.</returns>
 		public bool InsertUnique(MySqlConnection connection)
 		{
-			string baseInsertCommand = "INSERT INTO temp_G3 (date, time, rear_generator_bearing_temp, front_generator_bearing_temp," +
+			string baseInsertCommand = "INSERT INTO temp_G3 (date, rear_generator_bearing_temp, front_generator_bearing_temp," +
 			                           "turbine_bearing_temp, state) " +
-			                           "VALUES(@date, @time, @rear_generator_bearing_temp, @front_generator_bearing_temp, " +
+			                           "VALUES(@date, @rear_generator_bearing_temp, @front_generator_bearing_temp, " +
 			                           "@turbine_bearing_temp, @state)";
 
-			string baseSelectCommand = "SELECT date, time FROM temp_G3 WHERE date LIKE @date AND time LIKE @time";
+			string baseSelectCommand = "SELECT date FROM temp_G3 WHERE date LIKE @date";
 
 			MySqlCommand selectCommand = new MySqlCommand(baseSelectCommand, connection);
 			selectCommand.Parameters.AddWithValue("@date", this.Date);
-			selectCommand.Parameters.AddWithValue("@time", this.Time);
 
 			try
 			{
@@ -198,7 +185,6 @@ namespace Krafta.Records
 
 			MySqlCommand insertCommand = new MySqlCommand(baseInsertCommand, connection);
 			insertCommand.Parameters.AddWithValue("@date", this.Date);
-			insertCommand.Parameters.AddWithValue("@time", this.Time);
 			insertCommand.Parameters.AddWithValue("@rear_generator_bearing_temp", this.RearGeneratorBearingTemperature);
 			insertCommand.Parameters.AddWithValue("@front_generator_bearing_temp", this.FrontGeneratorBearingTemperature);
 			insertCommand.Parameters.AddWithValue("@turbine_bearing_temp", this.TurbineBearingTemperature);

@@ -37,15 +37,6 @@ namespace Krafta.Records
 			get;
 		}
 
-		/// <summary>
-		/// Gets the time.
-		/// </summary>
-		/// <value>The time.</value>
-		string Time
-		{
-			get;
-		}
-
 		// ...
 
 		/// <summary>
